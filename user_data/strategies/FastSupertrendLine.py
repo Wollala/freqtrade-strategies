@@ -23,11 +23,8 @@ from freqtrade.strategy import IStrategy, IntParameter, DecimalParameter
 
 
 class FastSupertrendLine(IStrategy):
-    # minimal_roi = {
-    #     "0": 10
-    # }
-    # stoploss = -0.99
     timeframe = '2h'
+
     # Buy hyperspace params:
     buy_params = {
         "buy_m1": 11.0,
@@ -68,16 +65,16 @@ class FastSupertrendLine(IStrategy):
     buy_m1 = DecimalParameter(1, 15, decimals=1, default=7.1, space='buy')
     buy_m2 = DecimalParameter(1, 15, decimals=1, default=7.1, space='buy')
     buy_m3 = DecimalParameter(1, 15, decimals=1, default=7.1, space='buy')
-    buy_p1 = IntParameter(2, 60, default=30, space='buy')
-    buy_p2 = IntParameter(2, 60, default=30, space='buy')
-    buy_p3 = IntParameter(2, 60, default=30, space='buy')
+    buy_p1 = IntParameter(2, 100, default=50, space='buy')
+    buy_p2 = IntParameter(2, 100, default=50, space='buy')
+    buy_p3 = IntParameter(2, 100, default=50, space='buy')
 
     sell_m1 = DecimalParameter(1, 15, decimals=1, default=7.1, space='sell')
     sell_m2 = DecimalParameter(1, 15, decimals=1, default=7.1, space='sell')
     sell_m3 = DecimalParameter(1, 15, decimals=1, default=7.1, space='sell')
-    sell_p1 = IntParameter(2, 60, default=30, space='sell')
-    sell_p2 = IntParameter(2, 60, default=30, space='sell')
-    sell_p3 = IntParameter(2, 60, default=30, space='sell')
+    sell_p1 = IntParameter(2, 100, default=50, space='sell')
+    sell_p2 = IntParameter(2, 100, default=50, space='sell')
+    sell_p3 = IntParameter(2, 100, default=50, space='sell')
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         return dataframe
@@ -167,3 +164,4 @@ class FastSupertrendLine(IStrategy):
             'ST': df[st],
             'STX': df[stx]
         })
+
