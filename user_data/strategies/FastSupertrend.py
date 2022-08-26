@@ -6,10 +6,12 @@ Supertrend strategy:
 * Author: @juankysoriano (Juan Carlos Soriano)
 * github: https://github.com/juankysoriano/
 
-*** NOTE: This Supertrend strategy is just one of many possible strategies using `Supertrend` as indicator. It should on any case used at your own risk.
-          It comes with at least a couple of caveats:
-            1. The implementation for the `supertrend` indicator is based on the following discussion: https://github.com/freqtrade/freqtrade-strategies/issues/30 . Concretelly https://github.com/freqtrade/freqtrade-strategies/issues/30#issuecomment-853042401
-            2. The implementation for `supertrend` on this strategy is not validated; meaning this that is not proven to match the results by the paper where it was originally introduced or any other trusted academic resources
+* NOTE: This Supertrend strategy is just one of many possible strategies using `Supertrend` as indicator. It should on any case used at your own risk.
+      It comes with at least a couple of caveats:
+        1. The implementation for the `supertrend` indicator is based on the following discussion: https://github.com/freqtrade/freqtrade-strategies/issues/30.
+           Concretelly https://github.com/freqtrade/freqtrade-strategies/issues/30#issuecomment-853042401
+        2. The implementation for `supertrend` on this strategy is not validated;
+           Meaning this that is not proven to match the results by the paper where it was originally introduced or any other trusted academic resources
 """
 
 import time
@@ -23,27 +25,74 @@ from freqtrade.strategy import IStrategy, IntParameter, DecimalParameter
 
 
 class FastSupertrend(IStrategy):
-    minimal_roi = {
-        "0": 10
-    }
-    stoploss = -0.99
-    # timeframe = '4h'
+    timeframe = '2h'
 
+    # Buy hyperspace params:
+    buy_params = {
+        "buy_m1": 11.0,
+        "buy_m2": 14.8,
+        "buy_m3": 4.5,
+        "buy_p1": 13,
+        "buy_p2": 58,
+        "buy_p3": 13,
+    }
+
+    # Sell hyperspace params:
+    sell_params = {
+        "sell_m1": 11.9,
+        "sell_m2": 6.9,
+        "sell_m3": 7.6,
+        "sell_p1": 26,
+        "sell_p2": 47,
+        "sell_p3": 40,
+    }
+
+    # ROI table:
+    minimal_roi = {
+        "0": 0.622,
+        "387": 0.138,
+        "1408": 0.081,
+        "3600": 0
+    }
+
+    # Stoploss:
+    stoploss = -0.348
+
+    # Trailing stop:
+    trailing_stop = False  # value loaded from strategy
+    trailing_stop_positive = None  # value loaded from strategy
+    trailing_stop_positive_offset = 0.0  # value loaded from strategy
+    trailing_only_offset_is_reached = False  # value loaded from strategy
+
+    # for hyperOpt
     buy_m1 = DecimalParameter(1, 15, decimals=1, default=7.1, space='buy')
     buy_m2 = DecimalParameter(1, 15, decimals=1, default=7.1, space='buy')
     buy_m3 = DecimalParameter(1, 15, decimals=1, default=7.1, space='buy')
-    buy_p1 = IntParameter(2, 60, default=30, space='buy')
-    buy_p2 = IntParameter(2, 60, default=30, space='buy')
-    buy_p3 = IntParameter(2, 60, default=30, space='buy')
+    buy_p1 = IntParameter(2, 100, default=50, space='buy')
+    buy_p2 = IntParameter(2, 100, default=50, space='buy')
+    buy_p3 = IntParameter(2, 100, default=50, space='buy')
 
     sell_m1 = DecimalParameter(1, 15, decimals=1, default=7.1, space='sell')
     sell_m2 = DecimalParameter(1, 15, decimals=1, default=7.1, space='sell')
     sell_m3 = DecimalParameter(1, 15, decimals=1, default=7.1, space='sell')
-    sell_p1 = IntParameter(2, 60, default=30, space='sell')
-    sell_p2 = IntParameter(2, 60, default=30, space='sell')
-    sell_p3 = IntParameter(2, 60, default=30, space='sell')
+    sell_p1 = IntParameter(2, 100, default=50, space='sell')
+    sell_p2 = IntParameter(2, 100, default=50, space='sell')
+    sell_p3 = IntParameter(2, 100, default=50, space='sell')
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        # merge 3 buy supertrend to one lines for freqUI
+        buy_df_list = [self.supertrend(dataframe, self.buy_m1.value, int(self.buy_p1.value))['ST'],
+                       self.supertrend(dataframe, self.buy_m2.value, int(self.buy_p2.value))['ST'],
+                       self.supertrend(dataframe, self.buy_m3.value, int(self.buy_p3.value))['ST']]
+        buy_df = pd.concat(buy_df_list, keys=range(len(buy_df_list))).groupby(level=1)
+        dataframe['supertrend_buy_line'] = buy_df.max()
+
+        # merge 3 sell supertrend to one lines for freqUI
+        sell_df_list = [self.supertrend(dataframe, self.sell_m1.value, int(self.sell_p1.value))['ST'],
+                        self.supertrend(dataframe, self.sell_m2.value, int(self.sell_p2.value))['ST'],
+                        self.supertrend(dataframe, self.sell_m3.value, int(self.sell_p3.value))['ST']]
+        sell_df = pd.concat(sell_df_list, keys=range(len(sell_df_list))).groupby(level=1)
+        dataframe['supertrend_sell_line'] = sell_df.min()
         return dataframe
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -56,31 +105,30 @@ class FastSupertrend(IStrategy):
 
         dataframe.loc[
             (
-                    (dataframe[f'supertrend_1_buy'] == 'up') &
-                    (dataframe[f'supertrend_2_buy'] == 'up') &
-                    (dataframe[f'supertrend_3_buy'] == 'up') &  # The three indicators are 'up' for the current candle
-                    (dataframe['volume'] > 0)  # There is at least some trading volume
-            ),
-            'enter_long'] = 1
+                # The three indicators are 'up' for the current candle
+                (dataframe[f'supertrend_1_buy'] == 'up') &
+                (dataframe[f'supertrend_2_buy'] == 'up') &
+                (dataframe[f'supertrend_3_buy'] == 'up') &
+                (dataframe['volume'] > 0)  # There is at least some trading volume
+            ), 'buy'] = 1
 
         return dataframe
 
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         dataframe.loc[
             (
-                    (dataframe[f'supertrend_1_sell'] == 'down') &
-                    (dataframe[f'supertrend_2_sell'] == 'down') &
-                    (dataframe[
-                         f'supertrend_3_sell'] == 'down') &  # The three indicators are 'down' for the current candle
-                    (dataframe['volume'] > 0)  # There is at least some trading volume
-            ),
-            'exit_long'] = 1
+                # The three indicators are 'down' for the current candle
+                (dataframe[f'supertrend_1_sell'] == 'down') &
+                (dataframe[f'supertrend_2_sell'] == 'down') &
+                (dataframe[f'supertrend_3_sell'] == 'down') &
+                (dataframe['volume'] > 0)  # There is at least some trading volume
+            ), 'sell'] = 1
 
         return dataframe
 
     """
-        Supertrend Indicator; adapted for freqtrade
-        from: https://github.com/freqtrade/freqtrade-strategies/issues/30
+            Supertrend Indicator; adapted for freqtrade
+            from: https://github.com/freqtrade/freqtrade-strategies/issues/30
     """
 
     def supertrend(self, dataframe: DataFrame, multiplier, period):
@@ -106,17 +154,29 @@ class FastSupertrend(IStrategy):
 
         # Compute final upper and lower bands
         for i in range(period, last_row):
-            FINAL_UB[i] = BASIC_UB[i] if BASIC_UB[i] < FINAL_UB[i - 1] or CLOSE[i - 1] > FINAL_UB[i - 1] else FINAL_UB[
-                i - 1]
-            FINAL_LB[i] = BASIC_LB[i] if BASIC_LB[i] > FINAL_LB[i - 1] or CLOSE[i - 1] < FINAL_LB[i - 1] else FINAL_LB[
-                i - 1]
+            if BASIC_UB[i] < FINAL_UB[i - 1] or CLOSE[i - 1] > FINAL_UB[i - 1]:
+                FINAL_UB[i] = BASIC_UB[i]
+            else:
+                FINAL_UB[i] = FINAL_UB[i - 1]
+
+            if BASIC_LB[i] > FINAL_LB[i - 1] or CLOSE[i - 1] < FINAL_LB[i - 1]:
+                FINAL_LB[i] = BASIC_LB[i]
+            else:
+                FINAL_LB[i] = FINAL_LB[i - 1]
 
         # Set the Supertrend value
         for i in range(period, last_row):
-            ST[i] = FINAL_UB[i] if ST[i - 1] == FINAL_UB[i - 1] and CLOSE[i] <= FINAL_UB[i] else \
-                FINAL_LB[i] if ST[i - 1] == FINAL_UB[i - 1] and CLOSE[i] > FINAL_UB[i] else \
-                    FINAL_LB[i] if ST[i - 1] == FINAL_LB[i - 1] and CLOSE[i] >= FINAL_LB[i] else \
-                        FINAL_UB[i] if ST[i - 1] == FINAL_LB[i - 1] and CLOSE[i] < FINAL_LB[i] else 0.00
+            if ST[i - 1] == FINAL_UB[i - 1] and CLOSE[i] <= FINAL_UB[i]:
+                ST[i] = FINAL_UB[i]
+            elif ST[i - 1] == FINAL_UB[i - 1] and CLOSE[i] > FINAL_UB[i]:
+                ST[i] = FINAL_LB[i]
+            elif ST[i - 1] == FINAL_LB[i - 1] and CLOSE[i] >= FINAL_LB[i]:
+                ST[i] = FINAL_LB[i]
+            elif ST[i - 1] == FINAL_LB[i - 1] and CLOSE[i] < FINAL_LB[i]:
+                ST[i] = FINAL_UB[i]
+            else:
+                ST[i] = 0.00
+
         df_ST = pd.DataFrame(ST, columns=[st])
         df = pd.concat([df, df_ST], axis=1)
 
@@ -132,3 +192,4 @@ class FastSupertrend(IStrategy):
             'ST': df[st],
             'STX': df[stx]
         })
+
