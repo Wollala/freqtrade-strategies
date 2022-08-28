@@ -22,41 +22,108 @@ import talib.abstract as ta
 from pandas import DataFrame
 
 from freqtrade.strategy import IStrategy, IntParameter, DecimalParameter
+'''
+FastSupertrend_ETHUSDT_20180101-20211231.2022-08-29_020206 이 파일에서 가져옴.
+실제론 2h 결과 2개가 있는데 (아래 참고)
+1. |   Best | 1868/2000 |      162 |     99   47   16 |        2.66% |   479238.821 USDT (4,792.39%) | 3 days 00:24:00 | -479,238.82121 |     89620.801 USDT   (21.52%) |
+2. |   Best | 1490/2000 |      175 |    104   57   14 |        2.51% |   499028.520 USDT (4,990.29%) | 3 days 04:04:00 | -494,052.92164 |     64725.023 USDT   (13.03%) |
+최근 벡테스팅(2022.01.01~2022.08.20) 과 전체 기간 백테스팅(2017.01.01~2022.08.20)은 1번이 더 좋아서 1번을 사용하기로 함. 아래가 1번의 결과임.
+
+=========================================================== BACKTESTING REPORT ==========================================================
+|     Pair |   Buys |   Avg Profit % |   Cum Profit % |   Tot Profit USDT |   Tot Profit % |     Avg Duration |   Win  Draw  Loss  Win% |
+|----------+--------+----------------+----------------+-------------------+----------------+------------------+-------------------------|
+| ETH/USDT |    179 |           2.59 |         464.09 |         64051.268 |        6405.13 | 2 days, 23:30:00 |   109    52    18  60.9 |
+|    TOTAL |    179 |           2.59 |         464.09 |         64051.268 |        6405.13 | 2 days, 23:30:00 |   109    52    18  60.9 |
+========================================================== ENTER TAG STATS ===========================================================
+|   TAG |   Buys |   Avg Profit % |   Cum Profit % |   Tot Profit USDT |   Tot Profit % |     Avg Duration |   Win  Draw  Loss  Win% |
+|-------+--------+----------------+----------------+-------------------+----------------+------------------+-------------------------|
+| TOTAL |    179 |           2.59 |         464.09 |         64051.268 |        6405.13 | 2 days, 23:30:00 |   109    52    18  60.9 |
+===================================================== EXIT REASON STATS =====================================================
+|   Exit Reason |   Exits |   Win  Draws  Loss  Win% |   Avg Profit % |   Cum Profit % |   Tot Profit USDT |   Tot Profit % |
+|---------------+---------+--------------------------+----------------+----------------+-------------------+----------------|
+|           roi |     161 |    109    52     0   100 |           4.19 |         675.09 |          108998   |         675.09 |
+|   exit_signal |      18 |      0     0    18     0 |         -11.72 |        -211    |          -44947.1 |        -211    |
+====================================================== LEFT OPEN TRADES REPORT ======================================================
+|   Pair |   Buys |   Avg Profit % |   Cum Profit % |   Tot Profit USDT |   Tot Profit % |   Avg Duration |   Win  Draw  Loss  Win% |
+|--------+--------+----------------+----------------+-------------------+----------------+----------------+-------------------------|
+|  TOTAL |      0 |           0.00 |           0.00 |             0.000 |           0.00 |           0:00 |     0     0     0     0 |
+================== SUMMARY METRICS ==================
+| Metric                      | Value               |
+|-----------------------------+---------------------|
+| Backtesting from            | 2018-01-01 00:00:00 |
+| Backtesting to              | 2022-08-19 14:00:00 |
+| Max open trades             | 1                   |
+|                             |                     |
+| Total/Daily Avg Trades      | 179 / 0.11          |
+| Starting balance            | 1000 USDT           |
+| Final balance               | 65051.268 USDT      |
+| Absolute profit             | 64051.268 USDT      |
+| Total profit %              | 6405.13%            |
+| CAGR %                      | 146.26%             |
+| Profit factor               | 2.43                |
+| Trades per day              | 0.11                |
+| Avg. daily profit %         | 3.79%               |
+| Avg. stake amount           | 18911.94 USDT       |
+| Total trade volume          | 3385237.331 USDT    |
+|                             |                     |
+| Best Pair                   | ETH/USDT 464.09%    |
+| Worst Pair                  | ETH/USDT 464.09%    |
+| Best trade                  | ETH/USDT 17.95%     |
+| Worst trade                 | ETH/USDT -21.71%    |
+| Best day                    | 7300.419 USDT       |
+| Worst day                   | -9645.048 USDT      |
+| Days win/draw/lose          | 108 / 1462 / 18     |
+| Avg. Duration Winners       | 1 day, 22:44:00     |
+| Avg. Duration Loser         | 4 days, 15:53:00    |
+| Rejected Entry signals      | 0                   |
+| Entry/Exit Timeouts         | 0 / 0               |
+|                             |                     |
+| Min balance                 | 1033.234 USDT       |
+| Max balance                 | 74696.316 USDT      |
+| Max % of account underwater | 31.61%              |
+| Absolute Drawdown (Account) | 12.91%              |
+| Absolute Drawdown           | 9645.048 USDT       |
+| Drawdown high               | 73696.316 USDT      |
+| Drawdown low                | 64051.268 USDT      |
+| Drawdown Start              | 2022-08-13 08:00:00 |
+| Drawdown End                | 2022-08-19 08:00:00 |
+| Market change               | 136.52%             |
+=====================================================
+'''
 
 
 class FastSupertrend(IStrategy):
     timeframe = '2h'
-
     # Buy hyperspace params:
     buy_params = {
-        "buy_m1": 11.0,
-        "buy_m2": 14.8,
-        "buy_m3": 4.5,
-        "buy_p1": 13,
-        "buy_p2": 58,
-        "buy_p3": 13,
+        "buy_m1": 1.9,
+        "buy_m2": 5.3,
+        "buy_m3": 15.4,
+        "buy_p1": 17,
+        "buy_p2": 22,
+        "buy_p3": 46,
     }
 
     # Sell hyperspace params:
     sell_params = {
-        "sell_m1": 11.9,
-        "sell_m2": 6.9,
-        "sell_m3": 7.6,
-        "sell_p1": 26,
-        "sell_p2": 47,
-        "sell_p3": 40,
+        "sell_m1": 4.9,
+        "sell_m2": 9.0,
+        "sell_m3": 2.4,
+        "sell_p1": 23,
+        "sell_p2": 21,
+        "sell_p3": 60,
     }
 
     # ROI table:
     minimal_roi = {
-        "0": 0.622,
-        "387": 0.138,
-        "1408": 0.081,
-        "3600": 0
+        "0": 0.292,
+        "762": 0.135,
+        "1632": 0.087,
+        "3480": 0
     }
 
     # Stoploss:
-    stoploss = -0.348
+    stoploss = -0.272
 
     # Trailing stop:
     trailing_stop = False  # value loaded from strategy
@@ -64,20 +131,27 @@ class FastSupertrend(IStrategy):
     trailing_stop_positive_offset = 0.0  # value loaded from strategy
     trailing_only_offset_is_reached = False  # value loaded from strategy
 
-    # for hyperOpt
-    buy_m1 = DecimalParameter(1, 15, decimals=1, default=7.1, space='buy')
-    buy_m2 = DecimalParameter(1, 15, decimals=1, default=7.1, space='buy')
-    buy_m3 = DecimalParameter(1, 15, decimals=1, default=7.1, space='buy')
-    buy_p1 = IntParameter(2, 100, default=50, space='buy')
-    buy_p2 = IntParameter(2, 100, default=50, space='buy')
-    buy_p3 = IntParameter(2, 100, default=50, space='buy')
+    # --------------- for hyperOpt ---------------
+    # minimal_roi = {
+    #     "0": 100
+    # }
+    #
+    # # Stoploss:
+    # stoploss = -0.99
 
-    sell_m1 = DecimalParameter(1, 15, decimals=1, default=7.1, space='sell')
-    sell_m2 = DecimalParameter(1, 15, decimals=1, default=7.1, space='sell')
-    sell_m3 = DecimalParameter(1, 15, decimals=1, default=7.1, space='sell')
-    sell_p1 = IntParameter(2, 100, default=50, space='sell')
-    sell_p2 = IntParameter(2, 100, default=50, space='sell')
-    sell_p3 = IntParameter(2, 100, default=50, space='sell')
+    buy_m1 = DecimalParameter(1, 20, decimals=1, default=10.0, space='buy')
+    buy_m2 = DecimalParameter(1, 20, decimals=1, default=10.0, space='buy')
+    buy_m3 = DecimalParameter(1, 20, decimals=1, default=10.0, space='buy')
+    buy_p1 = IntParameter(2, 60, default=30, space='buy')
+    buy_p2 = IntParameter(2, 60, default=30, space='buy')
+    buy_p3 = IntParameter(2, 60, default=30, space='buy')
+
+    sell_m1 = DecimalParameter(1, 20, decimals=1, default=10.0, space='sell')
+    sell_m2 = DecimalParameter(1, 20, decimals=1, default=10.0, space='sell')
+    sell_m3 = DecimalParameter(1, 20, decimals=1, default=10.0, space='sell')
+    sell_p1 = IntParameter(2, 60, default=30, space='sell')
+    sell_p2 = IntParameter(2, 60, default=30, space='sell')
+    sell_p3 = IntParameter(2, 60, default=30, space='sell')
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         # merge 3 buy supertrend to one lines for freqUI
@@ -106,11 +180,11 @@ class FastSupertrend(IStrategy):
         dataframe.loc[
             (
                 # The three indicators are 'up' for the current candle
-                (dataframe[f'supertrend_1_buy'] == 'up') &
-                (dataframe[f'supertrend_2_buy'] == 'up') &
-                (dataframe[f'supertrend_3_buy'] == 'up') &
-                (dataframe['volume'] > 0)  # There is at least some trading volume
-            ), 'buy'] = 1
+                    (dataframe[f'supertrend_1_buy'] == 'up') &
+                    (dataframe[f'supertrend_2_buy'] == 'up') &
+                    (dataframe[f'supertrend_3_buy'] == 'up') &
+                    (dataframe['volume'] > 0)  # There is at least some trading volume
+            ), 'enter_long'] = 1
 
         return dataframe
 
@@ -118,11 +192,11 @@ class FastSupertrend(IStrategy):
         dataframe.loc[
             (
                 # The three indicators are 'down' for the current candle
-                (dataframe[f'supertrend_1_sell'] == 'down') &
-                (dataframe[f'supertrend_2_sell'] == 'down') &
-                (dataframe[f'supertrend_3_sell'] == 'down') &
-                (dataframe['volume'] > 0)  # There is at least some trading volume
-            ), 'sell'] = 1
+                    (dataframe[f'supertrend_1_sell'] == 'down') &
+                    (dataframe[f'supertrend_2_sell'] == 'down') &
+                    (dataframe[f'supertrend_3_sell'] == 'down') &
+                    (dataframe['volume'] > 0)  # There is at least some trading volume
+            ), 'exit_long'] = 1
 
         return dataframe
 
@@ -135,7 +209,7 @@ class FastSupertrend(IStrategy):
         start_time = time.time()
 
         df = dataframe.copy()
-        last_row = dataframe.tail(1).index.item()
+        last_row = dataframe.tail(1).index.item() + 1
 
         df['TR'] = ta.TRANGE(df)
         df['ATR'] = ta.SMA(df['TR'], period)
@@ -144,38 +218,38 @@ class FastSupertrend(IStrategy):
         stx = 'STX_' + str(period) + '_' + str(multiplier)
 
         # Compute basic upper and lower bands
-        BASIC_UB = ((df['high'] + df['low']) / 2 + multiplier * df['ATR']).values
-        BASIC_LB = ((df['high'] + df['low']) / 2 - multiplier * df['ATR']).values
+        UP = ((df['high'] + df['low']) / 2 + multiplier * df['ATR']).values
+        DOWN = ((df['high'] + df['low']) / 2 - multiplier * df['ATR']).values
 
-        FINAL_UB = np.zeros(last_row + 1)
-        FINAL_LB = np.zeros(last_row + 1)
-        ST = np.zeros(last_row + 1)
+        TRAND_UP = np.zeros(last_row)
+        TRAND_DOWN = np.zeros(last_row)
+        ST = np.zeros(last_row)
         CLOSE = df['close'].values
 
         # Compute final upper and lower bands
         for i in range(period, last_row):
-            if BASIC_UB[i] < FINAL_UB[i - 1] or CLOSE[i - 1] > FINAL_UB[i - 1]:
-                FINAL_UB[i] = BASIC_UB[i]
+            if UP[i] < TRAND_UP[i - 1] or CLOSE[i - 1] > TRAND_UP[i - 1]:
+                TRAND_UP[i] = UP[i]
             else:
-                FINAL_UB[i] = FINAL_UB[i - 1]
+                TRAND_UP[i] = TRAND_UP[i - 1]
 
-            if BASIC_LB[i] > FINAL_LB[i - 1] or CLOSE[i - 1] < FINAL_LB[i - 1]:
-                FINAL_LB[i] = BASIC_LB[i]
+            if DOWN[i] > TRAND_DOWN[i - 1] or CLOSE[i - 1] < TRAND_DOWN[i - 1]:
+                TRAND_DOWN[i] = DOWN[i]
             else:
-                FINAL_LB[i] = FINAL_LB[i - 1]
+                TRAND_DOWN[i] = TRAND_DOWN[i - 1]
 
         # Set the Supertrend value
         for i in range(period, last_row):
-            if ST[i - 1] == FINAL_UB[i - 1] and CLOSE[i] <= FINAL_UB[i]:
-                ST[i] = FINAL_UB[i]
-            elif ST[i - 1] == FINAL_UB[i - 1] and CLOSE[i] > FINAL_UB[i]:
-                ST[i] = FINAL_LB[i]
-            elif ST[i - 1] == FINAL_LB[i - 1] and CLOSE[i] >= FINAL_LB[i]:
-                ST[i] = FINAL_LB[i]
-            elif ST[i - 1] == FINAL_LB[i - 1] and CLOSE[i] < FINAL_LB[i]:
-                ST[i] = FINAL_UB[i]
+            if ST[i - 1] == TRAND_UP[i - 1] and CLOSE[i] <= TRAND_UP[i]:
+                ST[i] = TRAND_UP[i]
+            elif ST[i - 1] == TRAND_UP[i - 1] and CLOSE[i] > TRAND_UP[i]:
+                ST[i] = TRAND_DOWN[i]
+            elif ST[i - 1] == TRAND_DOWN[i - 1] and CLOSE[i] >= TRAND_DOWN[i]:
+                ST[i] = TRAND_DOWN[i]
+            elif ST[i - 1] == TRAND_DOWN[i - 1] and CLOSE[i] < TRAND_DOWN[i]:
+                ST[i] = TRAND_UP[i]
             else:
-                ST[i] = 0.00
+                ST[i] = ST[i - 1]
 
         df_ST = pd.DataFrame(ST, columns=[st])
         df = pd.concat([df, df_ST], axis=1)
