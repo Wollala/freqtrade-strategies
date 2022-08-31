@@ -23,26 +23,21 @@ from pandas import DataFrame
 
 from freqtrade.strategy import IStrategy, IntParameter, DecimalParameter
 '''
-FastSupertrend_ETHUSDT_20180101-20211231.2022-08-29_020206 이 파일에서 가져옴.
-실제론 2h 결과 2개가 있는데 (아래 참고)
-1. |   Best | 1868/2000 |      162 |     99   47   16 |        2.66% |   479238.821 USDT (4,792.39%) | 3 days 00:24:00 | -479,238.82121 |     89620.801 USDT   (21.52%) |
-2. |   Best | 1490/2000 |      175 |    104   57   14 |        2.51% |   499028.520 USDT (4,990.29%) | 3 days 04:04:00 | -494,052.92164 |     64725.023 USDT   (13.03%) |
-최근 벡테스팅(2022.01.01~2022.08.20) 과 전체 기간 백테스팅(2017.01.01~2022.08.20)은 1번이 더 좋아서 1번을 사용하기로 함. 아래가 1번의 결과임.
-
-=========================================================== BACKTESTING REPORT ==========================================================
-|     Pair |   Buys |   Avg Profit % |   Cum Profit % |   Tot Profit USDT |   Tot Profit % |     Avg Duration |   Win  Draw  Loss  Win% |
-|----------+--------+----------------+----------------+-------------------+----------------+------------------+-------------------------|
-| ETH/USDT |    179 |           2.59 |         464.09 |         64051.268 |        6405.13 | 2 days, 23:30:00 |   109    52    18  60.9 |
-|    TOTAL |    179 |           2.59 |         464.09 |         64051.268 |        6405.13 | 2 days, 23:30:00 |   109    52    18  60.9 |
-========================================================== ENTER TAG STATS ===========================================================
-|   TAG |   Buys |   Avg Profit % |   Cum Profit % |   Tot Profit USDT |   Tot Profit % |     Avg Duration |   Win  Draw  Loss  Win% |
-|-------+--------+----------------+----------------+-------------------+----------------+------------------+-------------------------|
-| TOTAL |    179 |           2.59 |         464.09 |         64051.268 |        6405.13 | 2 days, 23:30:00 |   109    52    18  60.9 |
+FastSupertrend_ETHUSDT_20180101-20211231.2022-09-01_080203 이 파일에서 가져옴.
+========================================================== BACKTESTING REPORT ==========================================================
+|     Pair |   Buys |   Avg Profit % |   Cum Profit % |   Tot Profit USDT |   Tot Profit % |    Avg Duration |   Win  Draw  Loss  Win% |
+|----------+--------+----------------+----------------+-------------------+----------------+-----------------+-------------------------|
+| ETH/USDT |    200 |           2.97 |         593.92 |       2257102.313 |       22571.02 | 3 days, 3:12:00 |   122    63    15  61.0 |
+|    TOTAL |    200 |           2.97 |         593.92 |       2257102.313 |       22571.02 | 3 days, 3:12:00 |   122    63    15  61.0 |
+========================================================== ENTER TAG STATS ==========================================================
+|   TAG |   Buys |   Avg Profit % |   Cum Profit % |   Tot Profit USDT |   Tot Profit % |    Avg Duration |   Win  Draw  Loss  Win% |
+|-------+--------+----------------+----------------+-------------------+----------------+-----------------+-------------------------|
+| TOTAL |    200 |           2.97 |         593.92 |       2257102.313 |       22571.02 | 3 days, 3:12:00 |   122    63    15  61.0 |
 ===================================================== EXIT REASON STATS =====================================================
 |   Exit Reason |   Exits |   Win  Draws  Loss  Win% |   Avg Profit % |   Cum Profit % |   Tot Profit USDT |   Tot Profit % |
 |---------------+---------+--------------------------+----------------+----------------+-------------------+----------------|
-|           roi |     161 |    109    52     0   100 |           4.19 |         675.09 |          108998   |         675.09 |
-|   exit_signal |      18 |      0     0    18     0 |         -11.72 |        -211    |          -44947.1 |        -211    |
+|           roi |     184 |    121    63     0   100 |           4.17 |         767.51 |       2.75343e+06 |         767.51 |
+|   exit_signal |      16 |      1     0    15   6.2 |         -10.85 |        -173.58 | -496327           |        -173.58 |
 ====================================================== LEFT OPEN TRADES REPORT ======================================================
 |   Pair |   Buys |   Avg Profit % |   Cum Profit % |   Tot Profit USDT |   Tot Profit % |   Avg Duration |   Win  Draw  Loss  Win% |
 |--------+--------+----------------+----------------+-------------------+----------------+----------------+-------------------------|
@@ -50,44 +45,44 @@ FastSupertrend_ETHUSDT_20180101-20211231.2022-08-29_020206 이 파일에서 가�
 ================== SUMMARY METRICS ==================
 | Metric                      | Value               |
 |-----------------------------+---------------------|
-| Backtesting from            | 2018-01-01 00:00:00 |
+| Backtesting from            | 2017-08-17 04:00:00 |
 | Backtesting to              | 2022-08-19 14:00:00 |
 | Max open trades             | 1                   |
 |                             |                     |
-| Total/Daily Avg Trades      | 179 / 0.11          |
-| Starting balance            | 1000 USDT           |
-| Final balance               | 65051.268 USDT      |
-| Absolute profit             | 64051.268 USDT      |
-| Total profit %              | 6405.13%            |
-| CAGR %                      | 146.26%             |
-| Profit factor               | 2.43                |
+| Total/Daily Avg Trades      | 200 / 0.11          |
+| Starting balance            | 10000 USDT          |
+| Final balance               | 2267102.313 USDT    |
+| Absolute profit             | 2257102.313 USDT    |
+| Total profit %              | 22571.02%           |
+| CAGR %                      | 195.34%             |
+| Profit factor               | 5.55                |
 | Trades per day              | 0.11                |
-| Avg. daily profit %         | 3.79%               |
-| Avg. stake amount           | 18911.94 USDT       |
-| Total trade volume          | 3385237.331 USDT    |
+| Avg. daily profit %         | 12.35%              |
+| Avg. stake amount           | 436636.918 USDT     |
+| Total trade volume          | 87327383.597 USDT   |
 |                             |                     |
-| Best Pair                   | ETH/USDT 464.09%    |
-| Worst Pair                  | ETH/USDT 464.09%    |
-| Best trade                  | ETH/USDT 17.95%     |
-| Worst trade                 | ETH/USDT -21.71%    |
-| Best day                    | 7300.419 USDT       |
-| Worst day                   | -9645.048 USDT      |
-| Days win/draw/lose          | 108 / 1462 / 18     |
-| Avg. Duration Winners       | 1 day, 22:44:00     |
-| Avg. Duration Loser         | 4 days, 15:53:00    |
+| Best Pair                   | ETH/USDT 593.92%    |
+| Worst Pair                  | ETH/USDT 593.92%    |
+| Best trade                  | ETH/USDT 15.74%     |
+| Worst trade                 | ETH/USDT -27.16%    |
+| Best day                    | 240401.37 USDT      |
+| Worst day                   | -290487.8 USDT      |
+| Days win/draw/lose          | 120 / 1601 / 15     |
+| Avg. Duration Winners       | 1 day, 16:43:00     |
+| Avg. Duration Loser         | 4 days, 3:12:00     |
 | Rejected Entry signals      | 0                   |
 | Entry/Exit Timeouts         | 0 / 0               |
 |                             |                     |
-| Min balance                 | 1033.234 USDT       |
-| Max balance                 | 74696.316 USDT      |
-| Max % of account underwater | 31.61%              |
-| Absolute Drawdown (Account) | 12.91%              |
-| Absolute Drawdown           | 9645.048 USDT       |
-| Drawdown high               | 73696.316 USDT      |
-| Drawdown low                | 64051.268 USDT      |
-| Drawdown Start              | 2022-08-13 08:00:00 |
-| Drawdown End                | 2022-08-19 08:00:00 |
-| Market change               | 136.52%             |
+| Min balance                 | 10000 USDT          |
+| Max balance                 | 2557590.113 USDT    |
+| Max % of account underwater | 29.39%              |
+| Absolute Drawdown (Account) | 11.36%              |
+| Absolute Drawdown           | 290487.8 USDT       |
+| Drawdown high               | 2547590.113 USDT    |
+| Drawdown low                | 2257102.313 USDT    |
+| Drawdown Start              | 2022-08-12 22:00:00 |
+| Drawdown End                | 2022-08-19 10:00:00 |
+| Market change               | 460.27%             |
 =====================================================
 '''
 
@@ -96,40 +91,40 @@ class FastSupertrend(IStrategy):
     timeframe = '2h'
     # Buy hyperspace params:
     buy_params = {
-        "buy_m1": 1.9,
-        "buy_m2": 5.3,
-        "buy_m3": 15.4,
-        "buy_p1": 17,
-        "buy_p2": 22,
-        "buy_p3": 46,
+        "buy_m1": 2.0,
+        "buy_m2": 5.0,
+        "buy_m3": 16.6,
+        "buy_p1": 39,
+        "buy_p2": 15,
+        "buy_p3": 27,
     }
 
     # Sell hyperspace params:
     sell_params = {
-        "sell_m1": 4.9,
-        "sell_m2": 9.0,
-        "sell_m3": 2.4,
-        "sell_p1": 23,
-        "sell_p2": 21,
-        "sell_p3": 60,
+        "sell_m1": 1.7,
+        "sell_m2": 1.0,
+        "sell_m3": 9.9,
+        "sell_p1": 36,
+        "sell_p2": 12,
+        "sell_p3": 33,
     }
 
     # ROI table:
     minimal_roi = {
-        "0": 0.292,
-        "762": 0.135,
-        "1632": 0.087,
-        "3480": 0
+        "0": 0.598,
+        "756": 0.136,
+        "1711": 0.053,
+        "4315": 0
     }
 
     # Stoploss:
-    stoploss = -0.272
+    stoploss = -0.326
 
     # Trailing stop:
-    trailing_stop = False  # value loaded from strategy
-    trailing_stop_positive = None  # value loaded from strategy
-    trailing_stop_positive_offset = 0.0  # value loaded from strategy
-    trailing_only_offset_is_reached = False  # value loaded from strategy
+    trailing_stop = True
+    trailing_stop_positive = 0.142
+    trailing_stop_positive_offset = 0.146
+    trailing_only_offset_is_reached = True
 
     # --------------- for hyperOpt ---------------
     # minimal_roi = {
@@ -266,4 +261,3 @@ class FastSupertrend(IStrategy):
             'ST': df[st],
             'STX': df[stx]
         })
-
